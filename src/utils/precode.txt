@@ -1,0 +1,12 @@
+evaluate the score value of the given input according to the following rules:
+
+rock = a = x = 1pt 
+paper = b =y = 2pts
+scissors = c = z = 3pts
+
+winning = 6pts
+draw = 3pts
+losing = 0pts
+
+- data msut be parsed line by line to evaluate results
+- don't convert any data, just add base -> evaluate -> add result -> add to sum
