@@ -1,0 +1,7 @@
+*.log
+*.sql
+*.sqlite
+*.pub
+*.env
+
+github
