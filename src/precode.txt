@@ -1,0 +1,12 @@
+============= # 001 ============
+a = x = 1 = rock
+b = y = 2 = paper
+c = z = 3 = scissors
+
+the score final scores of the 9 possible combinations are unique from 1 to 9
+this is small enough for a plain switch statement
+
+============= # 003 ============
+- get the input string and split it in half
+- check if a character in the first half exists in the second half, if it does delete both
+- if it doesn't lookup value
