@@ -1,4 +1,4 @@
-============= # 001 ============
+============= # 02 ============
 a = x = 1 = rock
 b = y = 2 = paper
 c = z = 3 = scissors
@@ -6,7 +6,24 @@ c = z = 3 = scissors
 the score final scores of the 9 possible combinations are unique from 1 to 9
 this is small enough for a plain switch statement
 
-============= # 003 ============
+oh no! the original idea was wrogn. We've gotta refactor.
+
+a = 1 = rock
+b = 2 = paper
+c = 3 = scissors
+
+x = lose = 0
+y = draw = 3
+z = win = 6
+
+there are still only 9 fixed out comes, so we just change our switch statement to match the new rules
+
+============= # 03 ============
 - get the input string and split it in half
 - check if a character in the first half exists in the second half, if it does delete both
 - if it doesn't lookup value
+
+============= # 04 ============
+- split the input line into the start and stop range values
+- create sets for both ranges
+- check if a is a subset of b or vice versa

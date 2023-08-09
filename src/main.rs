@@ -1,7 +1,9 @@
 use std::cmp::Ordering;
 use std::fs::File;
+use std::hash::Hash;
 use std::io::{self, BufRead};
 use std::path::Path;
+use std::collections::HashSet;
 
 pub fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>>
 where
@@ -46,6 +48,8 @@ fn xmas() { // DONE
 fn aoc_01() { // DONE
     // calaculate the toal sums of calories carried by each elf
     // values are line-by-line with a blank line separating elves
+    // records are kept in a records struct that implements an update_records method
+    // there's probably a better way to do this with an array
 
     struct Records {
         first: u32,
@@ -121,15 +125,15 @@ fn aoc_02() { // DONE
             if let Ok(ln) = line {
                 // final value of any given match as described by the original prompt
                 match ln.trim() {
-                    "A X" => {total += 4; println!("{} {}", ln, total ); continue;},
-                    "A Y" => {total += 8; println!("{} {}", ln, total ); continue;},
-                    "A Z" => {total += 3; println!("{} {}", ln, total ); continue;},
+                    "A X" => {total += 3; println!("{} {}", ln, total ); continue;},
+                    "A Y" => {total += 4; println!("{} {}", ln, total ); continue;},
+                    "A Z" => {total += 8; println!("{} {}", ln, total ); continue;},
                     "B X" => {total += 1; println!("{} {}", ln, total ); continue;},
                     "B Y" => {total += 5; println!("{} {}", ln, total ); continue;},
                     "B Z" => {total += 9; println!("{} {}", ln, total ); continue;},
-                    "C X" => {total += 7; println!("{} {}", ln, total ); continue;},
-                    "C Y" => {total += 2; println!("{} {}", ln, total ); continue;},
-                    "C Z" => {total += 6; println!("{} {}", ln, total ); continue;},
+                    "C X" => {total += 2; println!("{} {}", ln, total ); continue;},
+                    "C Y" => {total += 6; println!("{} {}", ln, total ); continue;},
+                    "C Z" => {total += 7; println!("{} {}", ln, total ); continue;},
                     _ => {print!("Uh oh! Invalid match data."); break;}
                 }
             }
@@ -138,37 +142,26 @@ fn aoc_02() { // DONE
     }
 }
 
-fn aoc_03() { // DONE
-    fn get_char_val(char: char) -> u32 {
-        if char.is_ascii_lowercase() { return char as u32 - 96 };
-        if char.is_ascii_uppercase() { return char as u32 - 38 };
-        panic!("This is not a valid ascii character!")
-    }
-
-    let mut result: u32 = 0;
-    
-    if let Ok(lines) = read_lines("D:\\rust\\apps\\advent_of_code\\src\\aoc_2022_03_input.txt") {
+fn aoc_04() { //PART 1 DONE
+    let mut count = 0;
+    if let Ok(lines) = read_lines("D:\\rust\\apps\\advent_of_code\\src\\aoc_2022_04_input.txt") {
         for line in lines {
             if let Ok(ln) = line {
-                let half_len = ln.len()/2;
-                let mut char_vec_a: Vec<char> = ln[..half_len].chars().collect(); // these work
-                let char_vec_b: Vec<char> = ln[half_len..].chars().collect(); // these work
-
-                'outer: while char_vec_a.len() > 0 {
-                    let char_a = char_vec_a.pop().unwrap();
-                    for i in 0..half_len {
-                        let char_b = char_vec_b[i];
-                        if char_a == char_b { result += get_char_val(char_a); break 'outer; }
-                    }
+                let zones: Vec<_> = ln.split(|c| c == ',' || c == '-').map(|c| c.parse::<i32>().unwrap()).collect();
+                let zone_a:HashSet<i32> = HashSet::from_iter(zones[0]..zones[1]+1);
+                let zone_b:HashSet<i32> = HashSet::from_iter(zones[2]..zones[3]+1);
+                if zone_a.is_subset(&zone_b) || zone_b.is_subset(&zone_a) {
+                    println!("{:?}", zones);
+                    count += 1;
                 }
             }
         }
     }
-    println!("The total value of all incorrect characters is {}.", result);
+    println!("{}", count);
 }
 fn main() {
     // xmas();
-    aoc_01();
+    // aoc_01();
     // aoc_02();
-    // aoc_03();
+    aoc_04();
 }
