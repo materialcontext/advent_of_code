@@ -142,26 +142,44 @@ fn aoc_02() { // DONE
     }
 }
 
-fn aoc_04() { //PART 1 DONE
-    let mut count = 0;
+fn aoc_04() { //DONE
+    // given two ranges, count all of the subsets and partial overlaps
+    let mut count_subsets: i32 = 0;
+    let mut count_overlap: i32 = 0;
+
     if let Ok(lines) = read_lines("D:\\rust\\apps\\advent_of_code\\src\\aoc_2022_04_input.txt") {
         for line in lines {
             if let Ok(ln) = line {
+                // split the input string into a vector of rnage markers [start, end, start, end] and change them into i32
                 let zones: Vec<_> = ln.split(|c| c == ',' || c == '-').map(|c| c.parse::<i32>().unwrap()).collect();
+                // create two hashsets for the two ranges
                 let zone_a:HashSet<i32> = HashSet::from_iter(zones[0]..zones[1]+1);
                 let zone_b:HashSet<i32> = HashSet::from_iter(zones[2]..zones[3]+1);
                 if zone_a.is_subset(&zone_b) || zone_b.is_subset(&zone_a) {
+                    // if one range is a subset of the other, increment the subset counter
                     println!("{:?}", zones);
-                    count += 1;
+                    count_subsets += 1;
                 }
+                // create a union of the two hashsets
+                // if it is smaller than the two counted separately, increment the overlap counter
+                let mut union = zone_a.clone();
+                union.extend(&zone_b);
+                if union.len() < (zone_a.len() + zone_b.len()) {
+                    count_overlap += 1;
+                }
+
             }
         }
     }
-    println!("{}", count);
+    println!("{}, {}", count_subsets, count_overlap);
+}
+
+fn aoc_05() {
+
 }
 fn main() {
     // xmas();
     // aoc_01();
-    // aoc_02();
-    aoc_04();
+    // aoc_02();~
+    // aoc_04();
 }
