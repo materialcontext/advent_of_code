@@ -1,10 +1,11 @@
 use std::cmp::Ordering;
+use regex::Regex;
 use std::fs::File;
-use std::hash::Hash;
 use std::io::{self, BufRead};
 use std::path::Path;
 use std::collections::HashSet;
 
+/* ============ CONVENIENCE FUNCTIONS ============ */
 pub fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>>
 where
     P: AsRef<Path>,
@@ -174,12 +175,106 @@ fn aoc_04() { //DONE
     println!("{}, {}", count_subsets, count_overlap);
 }
 
-fn aoc_05() {
+fn aoc_05() { // PART 1 DONE
+    struct Ship {
+        cargo: Vec<Vec<u8>>,
+    }
 
+    impl Ship {
+        fn crane(&mut self, source: usize, destination: usize, depth: usize) {
+            let items = self.unpack(source, depth);
+            for item in items {
+                self.pack(destination, item);
+            }
+        }
+
+        fn pack(&mut self, destination: usize, item: u8) {
+            self.cargo[destination].push(item);
+        }
+
+        fn unpack(&mut self, source: usize, depth: usize) -> Vec<u8> {
+            let end = self.cargo[source].len();
+            self.cargo[source].drain((end - depth)..end).collect()
+        }
+
+        fn reverse(&mut self) {
+            for i in 0..self.cargo.len() {
+                self.cargo[i].reverse();
+            }
+        }
+    }
+    fn parse_move(line: &str) -> Vec<usize> {
+        // map all the numbers in the line to an array of move orders as usize
+        let r = Regex::new(r"(\d+)").unwrap();
+        let matches: Vec<usize>= r.find_iter(line)
+            .map(|c| c.as_str().parse::<usize>().unwrap()).collect();
+        matches
+    }
+
+    // create a ship with an empty cargo hold and 9 stacks
+    let width: usize = 9;
+    let mut ship = Ship {cargo: vec![Vec::<u8>::new(); width]};
+
+    // read the file
+    if let Ok(lines) = read_lines("D:\\rust\\apps\\advent_of_code\\src\\aoc_2022_05_input.txt") {
+        // track the current line so we know when to switch from packing to repacking
+        let mut curr_line = 1;
+        for line in lines {
+            if let Ok(ln) = line {
+                // inital sort
+                match &curr_line.cmp(&width) {
+                    Ordering::Less => {
+                        //initialize the line position & convert the line to a bytes array
+                        let mut i: usize = 1;
+                        let row = ln.as_bytes();
+                        // each stack is 4 chars long with spaces so a 9 stack cargo has 36 width
+                        while i < 36 {
+                            // calculate the destination stack from the position of the element in the line for each origin stack
+                            let destination: usize = (i + 3) / 4;
+                            // extract the element as bytes array
+                            let item = row[i];
+                            if !(item == 32) {
+                                // if the item is no a blank character, pack it
+                                ship.pack(destination - 1, item);
+                            }
+                            i += 4;
+                        }
+                    },
+                    Ordering::Equal => {
+                        // the stacks need to be reversed to match the source file for processing
+                        ship.reverse();
+                        for stack in &ship.cargo {
+                            println!("=== New Stack ===");
+                            for item in stack {
+                                println!("{:?}", item.clone() as char);
+                            }
+                        }
+                    },
+                    _ => ()
+                }
+                // start moving
+                match &curr_line.cmp(&10) {
+                    Ordering::Greater => {
+                        // get the move orders and then repack
+                        let moves = parse_move(&ln);
+                        ship.crane(moves[1] - 1, moves[2] - 1, moves[0])
+                    },
+                    _ => ()   
+                }
+            }
+            // go to next line
+            curr_line += 1;
+        }
+    }
+    for stack in ship.cargo {
+        let item = stack[stack.len() - 1];
+        println!("{}", item as char);
+    }
 }
 fn main() {
     // xmas();
     // aoc_01();
-    // aoc_02();~
+    // aoc_02();
     // aoc_04();
+    aoc_05();
 }
