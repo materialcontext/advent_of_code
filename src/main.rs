@@ -3,7 +3,7 @@ use regex::Regex;
 use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::Path;
-use std::collections::HashSet;
+use std::collections::{HashSet, VecDeque};
 
 /* ============ CONVENIENCE FUNCTIONS ============ */
 pub fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>>
@@ -126,21 +126,21 @@ fn aoc_02() { // DONE
             if let Ok(ln) = line {
                 // final value of any given match as described by the original prompt
                 match ln.trim() {
-                    "A X" => {total += 3; println!("{} {}", ln, total ); continue;},
-                    "A Y" => {total += 4; println!("{} {}", ln, total ); continue;},
-                    "A Z" => {total += 8; println!("{} {}", ln, total ); continue;},
-                    "B X" => {total += 1; println!("{} {}", ln, total ); continue;},
-                    "B Y" => {total += 5; println!("{} {}", ln, total ); continue;},
-                    "B Z" => {total += 9; println!("{} {}", ln, total ); continue;},
-                    "C X" => {total += 2; println!("{} {}", ln, total ); continue;},
-                    "C Y" => {total += 6; println!("{} {}", ln, total ); continue;},
-                    "C Z" => {total += 7; println!("{} {}", ln, total ); continue;},
+                    "A X" => {total += 3; continue;},
+                    "A Y" => {total += 4; continue;},
+                    "A Z" => {total += 8; continue;},
+                    "B X" => {total += 1; continue;},
+                    "B Y" => {total += 5; continue;},
+                    "B Z" => {total += 9; continue;},
+                    "C X" => {total += 2; continue;},
+                    "C Y" => {total += 6; continue;},
+                    "C Z" => {total += 7; continue;},
                     _ => {print!("Uh oh! Invalid match data."); break;}
                 }
             }
         }
-        println!("{}", total)
     }
+    println!("{}", total)
 }
 
 fn aoc_04() { //DONE
@@ -158,7 +158,6 @@ fn aoc_04() { //DONE
                 let zone_b:HashSet<i32> = HashSet::from_iter(zones[2]..zones[3]+1);
                 if zone_a.is_subset(&zone_b) || zone_b.is_subset(&zone_a) {
                     // if one range is a subset of the other, increment the subset counter
-                    println!("{:?}", zones);
                     count_subsets += 1;
                 }
                 // create a union of the two hashsets
@@ -243,12 +242,6 @@ fn aoc_05() { // PART 1 DONE
                     Ordering::Equal => {
                         // the stacks need to be reversed to match the source file for processing
                         ship.reverse();
-                        for stack in &ship.cargo {
-                            println!("=== New Stack ===");
-                            for item in stack {
-                                println!("{:?}", item.clone() as char);
-                            }
-                        }
                     },
                     _ => ()
                 }
@@ -266,15 +259,49 @@ fn aoc_05() { // PART 1 DONE
             curr_line += 1;
         }
     }
+    let mut output = Vec::<char>::new();
     for stack in ship.cargo {
         let item = stack[stack.len() - 1];
-        println!("{}", item as char);
+        output.push(item as char);
+    }
+    println!("{:?}", output)
+}
+
+fn aoc_06() {
+    fn unique(input: &[u8], size: usize) -> bool{
+        let mut sorted = input.to_vec();
+        sorted.sort();
+        for i in 0..size - 1 {
+            if sorted[i] == sorted[i + 1] { return false }
+        }
+        true
+    }
+
+    if let Ok(lines) = read_lines("D:\\rust\\apps\\advent_of_code\\src\\aoc_2022_06_input.txt") {
+        for line in lines {
+            let ln = line.unwrap();
+            let chars = ln.as_bytes();
+            let mut found = false;
+            for i in 0..chars.len() {
+                if unique(&chars[i..(i+4)], 4) && found == false {
+                    println!("{} {} {} {} {}", i+4, chars[i] as char, chars[i+1] as char, chars[i+2] as char, chars[i+3] as char);
+                    found = true;
+                }
+                if unique(&chars[i..(i+14)], 14) {
+                    println!("{}", i+14);
+                    break;
+                }
+            }
+
+        }
     }
 }
+
 fn main() {
     // xmas();
     // aoc_01();
     // aoc_02();
     // aoc_04();
-    aoc_05();
+    // aoc_05();
+    aoc_06();
 }
