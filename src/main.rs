@@ -2,8 +2,8 @@ use std::cmp::Ordering;
 use regex::Regex;
 use std::fs::File;
 use std::io::{self, BufRead};
-use std::path::Path;
-use std::collections::{HashSet, VecDeque};
+use std::path::{Path, PathBuf};
+use std::collections::{HashSet, HashMap};
 
 /* ============ CONVENIENCE FUNCTIONS ============ */
 pub fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>>
@@ -297,11 +297,81 @@ fn aoc_06() {
     }
 }
 
+fn aoc_07() {
+    let mut totals: Vec<u32> = Vec::new();
+    let mut stack: Vec<u32> = Vec::new();
+    stack.push(0);
+
+    let mut hundo = 0;
+
+    if let Ok(lines) = read_lines("D:\\rust\\apps\\advent_of_code\\src\\aoc_2022_07_input.txt") {
+        for line in lines {
+            if let Ok(ln) = line {
+                let cd = Regex::new(r"\$ cd ([\w\.]+)").unwrap().captures(&ln);
+                match cd {
+                    None => {},
+                    Some(_) => {
+                        let dir = cd.unwrap().get(1).unwrap().as_str();
+                        if dir == ".." {
+                            // Exit current directory.  Save its total size.
+                            let total = stack.pop().unwrap();
+                            totals.push(total);
+                            // Add that total size to its parent (if any)
+                            if let Some(top) = stack.last_mut() {
+                                *top += total;
+                            }
+                            continue;
+                        } else {
+                            // Entering a new directory; don't care about the name.
+                            // Initialize the size (so far) to 0.
+                            stack.push(0);
+                            continue;
+                        }
+                    }
+                }
+                let word = ln.split(' ').next().unwrap();
+                if let Ok(v) = word.parse::<u32>() {
+                    // Add the size of this file to the current directory
+                    *stack.last_mut().unwrap() += v;
+                }
+            }
+        }
+    }
+
+    // Pop any directories still on the stack
+    while let Some(v) = stack.pop() {
+        // Add that total size to its parent (if any)
+        if let Some(top) = stack.last_mut() {
+            *top += v;
+        }
+
+        totals.push(v);
+    }
+
+    for i in &totals {
+        if i < &100000 {
+            hundo += i
+        }
+    }
+    println!("{:?}", totals);
+    println!("{}", hundo);
+
+    let needed = 30000000 - (70000000 - totals.last().unwrap());
+    let mut to_delete: Vec<&u32> = totals.iter().filter(|val| val >= &&needed).collect();
+    to_delete.sort();
+    let out = to_delete.first().unwrap();
+
+    println!("{} {}", needed, out);
+    
+
+}
+
 fn main() {
     // xmas();
     // aoc_01();
     // aoc_02();
     // aoc_04();
     // aoc_05();
-    aoc_06();
+    // aoc_06();
+    aoc_07();
 }
