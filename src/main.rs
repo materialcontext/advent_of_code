@@ -1,9 +1,10 @@
-use std::cmp::Ordering;
 use regex::Regex;
+use std::cmp::Ordering;
+use std::collections::HashSet;
 use std::fs::File;
 use std::io::{self, BufRead};
-use std::path::{Path, PathBuf};
-use std::collections::{HashSet, HashMap};
+use std::path::Path;
+use std::vec;
 
 /* ============ CONVENIENCE FUNCTIONS ============ */
 pub fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>>
@@ -14,7 +15,8 @@ where
     Ok(io::BufReader::new(file).lines())
 }
 
-fn xmas() { // DONE
+fn xmas() {
+    // DONE
     let bars: [&str; 12] = [
         "A partridge in a pear tree.",
         "Two turtle doves, and",
@@ -46,7 +48,8 @@ fn xmas() { // DONE
     }
 }
 
-fn aoc_01() { // DONE
+fn aoc_01() {
+    // DONE
     // calaculate the toal sums of calories carried by each elf
     // values are line-by-line with a blank line separating elves
     // records are kept in a records struct that implements an update_records method
@@ -55,7 +58,7 @@ fn aoc_01() { // DONE
     struct Records {
         first: u32,
         second: u32,
-        third: u32
+        third: u32,
     }
 
     impl Records {
@@ -65,10 +68,8 @@ fn aoc_01() { // DONE
                     self.third = self.second;
                     self.second = self.first;
                     self.first = test_val;
-                },
-                Ordering::Less => {
-                    self.update_second(test_val)
                 }
+                Ordering::Less => self.update_second(test_val),
             }
         }
 
@@ -77,24 +78,24 @@ fn aoc_01() { // DONE
                 Ordering::Greater | Ordering::Equal => {
                     self.third = self.second;
                     self.second = test_val;
-                },
-                Ordering::Less => {
-                    self.update_third(test_val)
                 }
+                Ordering::Less => self.update_third(test_val),
             }
         }
 
         fn update_third(&mut self, test_val: u32) {
             match &test_val.cmp(&self.third) {
-                Ordering::Greater | Ordering::Equal => {
-                    self.third = test_val
-                },
-                _ => ()
+                Ordering::Greater | Ordering::Equal => self.third = test_val,
+                _ => (),
             }
         }
     }
 
-    let mut records: Records = Records{first:0, second:0, third:0};
+    let mut records: Records = Records {
+        first: 0,
+        second: 0,
+        third: 0,
+    };
 
     if let Ok(lines) = read_lines("D:\\rust\\apps\\advent_of_code\\src\\aoc_2022_01_input.txt") {
         let mut curr_total = 0;
@@ -110,14 +111,20 @@ fn aoc_01() { // DONE
                 }
             }
         }
-        println!("The elf with the most calories has {} calories.", records.first);
-        println!("The top three elves are carrying a total of {} calories.", records.first + records.second + records.third);
+        println!(
+            "The elf with the most calories has {} calories.",
+            records.first
+        );
+        println!(
+            "The top three elves are carrying a total of {} calories.",
+            records.first + records.second + records.third
+        );
     }
-
 }
 
-fn aoc_02() { // DONE
-    // calculate the final score from of a list of rock paper scissors matches 
+fn aoc_02() {
+    // DONE
+    // calculate the final score from of a list of rock paper scissors matches
     // (rock = 1, paper = 2, scissors =3); (loss = 0, draw = 3, win = 6)
     let mut total: i32 = 0;
 
@@ -126,16 +133,46 @@ fn aoc_02() { // DONE
             if let Ok(ln) = line {
                 // final value of any given match as described by the original prompt
                 match ln.trim() {
-                    "A X" => {total += 3; continue;},
-                    "A Y" => {total += 4; continue;},
-                    "A Z" => {total += 8; continue;},
-                    "B X" => {total += 1; continue;},
-                    "B Y" => {total += 5; continue;},
-                    "B Z" => {total += 9; continue;},
-                    "C X" => {total += 2; continue;},
-                    "C Y" => {total += 6; continue;},
-                    "C Z" => {total += 7; continue;},
-                    _ => {print!("Uh oh! Invalid match data."); break;}
+                    "A X" => {
+                        total += 3;
+                        continue;
+                    }
+                    "A Y" => {
+                        total += 4;
+                        continue;
+                    }
+                    "A Z" => {
+                        total += 8;
+                        continue;
+                    }
+                    "B X" => {
+                        total += 1;
+                        continue;
+                    }
+                    "B Y" => {
+                        total += 5;
+                        continue;
+                    }
+                    "B Z" => {
+                        total += 9;
+                        continue;
+                    }
+                    "C X" => {
+                        total += 2;
+                        continue;
+                    }
+                    "C Y" => {
+                        total += 6;
+                        continue;
+                    }
+                    "C Z" => {
+                        total += 7;
+                        continue;
+                    }
+                    _ => {
+                        print!("Uh oh! Invalid match data.");
+                        break;
+                    }
                 }
             }
         }
@@ -143,7 +180,8 @@ fn aoc_02() { // DONE
     println!("{}", total)
 }
 
-fn aoc_04() { //DONE
+fn aoc_04() {
+    //DONE
     // given two ranges, count all of the subsets and partial overlaps
     let mut count_subsets: i32 = 0;
     let mut count_overlap: i32 = 0;
@@ -152,10 +190,13 @@ fn aoc_04() { //DONE
         for line in lines {
             if let Ok(ln) = line {
                 // split the input string into a vector of rnage markers [start, end, start, end] and change them into i32
-                let zones: Vec<_> = ln.split(|c| c == ',' || c == '-').map(|c| c.parse::<i32>().unwrap()).collect();
+                let zones: Vec<_> = ln
+                    .split(|c| c == ',' || c == '-')
+                    .map(|c| c.parse::<i32>().unwrap())
+                    .collect();
                 // create two hashsets for the two ranges
-                let zone_a:HashSet<i32> = HashSet::from_iter(zones[0]..zones[1]+1);
-                let zone_b:HashSet<i32> = HashSet::from_iter(zones[2]..zones[3]+1);
+                let zone_a: HashSet<i32> = HashSet::from_iter(zones[0]..zones[1] + 1);
+                let zone_b: HashSet<i32> = HashSet::from_iter(zones[2]..zones[3] + 1);
                 if zone_a.is_subset(&zone_b) || zone_b.is_subset(&zone_a) {
                     // if one range is a subset of the other, increment the subset counter
                     count_subsets += 1;
@@ -167,14 +208,14 @@ fn aoc_04() { //DONE
                 if union.len() < (zone_a.len() + zone_b.len()) {
                     count_overlap += 1;
                 }
-
             }
         }
     }
     println!("{}, {}", count_subsets, count_overlap);
 }
 
-fn aoc_05() { // PART 1 DONE
+fn aoc_05() {
+    // PART 1 DONE
     struct Ship {
         cargo: Vec<Vec<u8>>,
     }
@@ -205,14 +246,18 @@ fn aoc_05() { // PART 1 DONE
     fn parse_move(line: &str) -> Vec<usize> {
         // map all the numbers in the line to an array of move orders as usize
         let r = Regex::new(r"(\d+)").unwrap();
-        let matches: Vec<usize>= r.find_iter(line)
-            .map(|c| c.as_str().parse::<usize>().unwrap()).collect();
+        let matches: Vec<usize> = r
+            .find_iter(line)
+            .map(|c| c.as_str().parse::<usize>().unwrap())
+            .collect();
         matches
     }
 
     // create a ship with an empty cargo hold and 9 stacks
     let width: usize = 9;
-    let mut ship = Ship {cargo: vec![Vec::<u8>::new(); width]};
+    let mut ship = Ship {
+        cargo: vec![Vec::<u8>::new(); width],
+    };
 
     // read the file
     if let Ok(lines) = read_lines("D:\\rust\\apps\\advent_of_code\\src\\aoc_2022_05_input.txt") {
@@ -238,12 +283,12 @@ fn aoc_05() { // PART 1 DONE
                             }
                             i += 4;
                         }
-                    },
+                    }
                     Ordering::Equal => {
                         // the stacks need to be reversed to match the source file for processing
                         ship.reverse();
-                    },
-                    _ => ()
+                    }
+                    _ => (),
                 }
                 // start moving
                 match &curr_line.cmp(&10) {
@@ -251,8 +296,8 @@ fn aoc_05() { // PART 1 DONE
                         // get the move orders and then repack
                         let moves = parse_move(&ln);
                         ship.crane(moves[1] - 1, moves[2] - 1, moves[0])
-                    },
-                    _ => ()   
+                    }
+                    _ => (),
                 }
             }
             // go to next line
@@ -268,11 +313,14 @@ fn aoc_05() { // PART 1 DONE
 }
 
 fn aoc_06() {
-    fn unique(input: &[u8], size: usize) -> bool{
+    //DONE
+    fn unique(input: &[u8], size: usize) -> bool {
         let mut sorted = input.to_vec();
         sorted.sort();
         for i in 0..size - 1 {
-            if sorted[i] == sorted[i + 1] { return false }
+            if sorted[i] == sorted[i + 1] {
+                return false;
+            }
         }
         true
     }
@@ -283,21 +331,28 @@ fn aoc_06() {
             let chars = ln.as_bytes();
             let mut found = false;
             for i in 0..chars.len() {
-                if unique(&chars[i..(i+4)], 4) && found == false {
-                    println!("{} {} {} {} {}", i+4, chars[i] as char, chars[i+1] as char, chars[i+2] as char, chars[i+3] as char);
+                if unique(&chars[i..(i + 4)], 4) && found == false {
+                    println!(
+                        "{} {} {} {} {}",
+                        i + 4,
+                        chars[i] as char,
+                        chars[i + 1] as char,
+                        chars[i + 2] as char,
+                        chars[i + 3] as char
+                    );
                     found = true;
                 }
-                if unique(&chars[i..(i+14)], 14) {
-                    println!("{}", i+14);
+                if unique(&chars[i..(i + 14)], 14) {
+                    println!("{}", i + 14);
                     break;
                 }
             }
-
         }
     }
 }
 
 fn aoc_07() {
+    //DONE LAZILY
     let mut totals: Vec<u32> = Vec::new();
     let mut stack: Vec<u32> = Vec::new();
     stack.push(0);
@@ -309,7 +364,7 @@ fn aoc_07() {
             if let Ok(ln) = line {
                 let cd = Regex::new(r"\$ cd ([\w\.]+)").unwrap().captures(&ln);
                 match cd {
-                    None => {},
+                    None => {}
                     Some(_) => {
                         let dir = cd.unwrap().get(1).unwrap().as_str();
                         if dir == ".." {
@@ -362,10 +417,133 @@ fn aoc_07() {
     let out = to_delete.first().unwrap();
 
     println!("{} {}", needed, out);
-    
-
 }
 
+fn aoc_08() {
+    let size: usize = 4;
+    let mut total: u32 = 0;
+    let mut north: Vec<u8> = Vec::new();
+    let mut south: Vec<Vec<u8>> = Vec::new();
+
+    if let Ok(lines) = read_lines("D:\\rust\\apps\\advent_of_code\\src\\aoc_2022_08_input.txt") {
+        println!("START");
+        let mut row: u32 = 0;
+        let mut west: u8 = 0;
+        let mut east: Vec<Option<u8>> = Vec::new();
+        let mut idx: usize = 0;
+        for line in lines {
+            if let Ok(ln) = line {
+                for height in ln.bytes() {
+                    if row == 0 {
+                        total += 1;
+                        if idx != size {
+                            north.push(height);
+                            south.push(Vec::new());
+                            idx += 1;
+                        } else {
+                            row += 1;
+                            idx = 0;
+                            west = 0;
+                            east = Vec::new()
+                        }
+                    }
+                    else if row == size as u32 {
+                        if idx == 0 {
+                            total += 1;
+                            idx += 1;
+                        }
+                        else if idx == size {
+                            total += 1;
+                        }
+                        else {
+                            south[idx].retain(|&x| x > height);
+                            south[idx].push(height);
+                            println!("South col {} {:?}",idx, south[idx]);
+                            total += south[idx].len() as u32;
+                            idx += 1;
+                        }
+                    }
+                    else if idx == size {
+                        east.iter().map(|&x| {
+                            let val = x.unwrap_or_default();
+                            if val > height {
+                                return x;
+                            } else { 
+                                return None;
+                            }
+                        });
+                        east.push(height);
+                        println!("east row {} {:?}", row, east);
+                        total += east.len() as u32;
+
+                        row += 1;
+                        idx = 0;
+                        west = 0;
+                        east = Vec::new()
+                    }
+                    else if height > west {
+                        total += 1;
+                        east.push(None);
+                        println!("west - {} is bigger than {}", height, west);
+                        west = height;
+                        if height > north[idx] {
+                            north[idx] = height;
+                            south[idx] = Vec::new();
+                        }
+                        else if height == north[idx] {
+                            south[idx] = Vec::new();
+                        }
+                        else {
+                            south[idx].retain(|&x| x > height);
+                        }
+                        idx += 1;
+                    }
+                    else if height == west {
+                        east = Vec::new();
+                        if height > north[idx] {
+                            total += 1;
+                            println!("north - {} is bigger than {}", height, north[idx]);
+                            north[idx] = height;
+                            south[idx] = Vec::new();
+                        }
+                        else if height == north[idx] {
+                            east.push(height);
+                            south[idx] = Vec::new();
+                            south[idx].push(height);
+                        }
+                        else {
+                            east.push(height);
+                            south[idx].retain(|&x| x > height);
+                            south[idx].push(height);
+                        }
+                        idx += 1;
+                    }
+                    else {
+                        east.retain(|&x| x > height);
+                        if height > north[idx] {
+                            total += 1;
+                            println!("north - {} is bigger than {}", height, north[idx]);
+                            north[idx] = height;
+                            south[idx] = Vec::new();
+                        }
+                        else if height == north[idx] {
+                            east.push(height);
+                            south[idx] = Vec::new();
+                            south[idx].push(height);
+                        }
+                        else {
+                            east.push(height);
+                            south[idx].retain(|&x| x > height);
+                            south[idx].push(height);
+                        }
+                        idx += 1;
+                    }
+                }
+            }
+        }
+    }
+    println!("{}", total);
+}
 fn main() {
     // xmas();
     // aoc_01();
@@ -373,5 +551,6 @@ fn main() {
     // aoc_04();
     // aoc_05();
     // aoc_06();
-    aoc_07();
+    // aoc_07();
+    aoc_08();
 }
